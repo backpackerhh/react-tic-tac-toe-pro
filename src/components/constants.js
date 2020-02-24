@@ -16,3 +16,8 @@ export const SCORES = {
   0: 0,
   2: -1
 };
+export const GAME_MODES = {
+  easy: "easy",
+  medium: "medium",
+  difficult: "difficult"
+};

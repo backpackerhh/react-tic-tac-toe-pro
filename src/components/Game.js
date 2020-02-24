@@ -2,7 +2,15 @@ import React, { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
 
 import Board from "./Board";
-import { DIMENSIONS, PLAYER_X, PLAYER_O, SQUARE_DIMENSIONS, GAME_STATES, DRAW } from "./constants";
+import {
+  DIMENSIONS,
+  PLAYER_X,
+  PLAYER_O,
+  SQUARE_DIMENSIONS,
+  GAME_STATES,
+  DRAW,
+  GAME_MODES
+} from "./constants";
 import { getRandomInt, switchPlayer } from "./utils";
 import { minimax } from "./minimax";
 
@@ -56,6 +64,7 @@ const Game = () => {
   const [gameState, setGameState] = useState(GAME_STATES.notStarted);
   const [nextMove, setNextMove] = useState(null);
   const [winner, setWinner] = useState(null);
+  const [mode, setMode] = useState(GAME_MODES.medium);
 
   const choosePlayer = option => {
     setPlayers({ human: option, computer: switchPlayer(option) });
@@ -81,15 +90,46 @@ const Game = () => {
   );
 
   const computerMove = useCallback(() => {
+    // Important to pass a copy of the grid here
     const board = new Board(grid.concat());
-    const index = board.isEmpty(grid) ? getRandomInt(0, 8) : minimax(board, players.computer)[1];
+    const emptyIndices = board.getEmptySquares(grid);
+    let index;
+
+    switch (mode) {
+      case GAME_MODES.easy:
+        index = getRandomInt(0, 8);
+
+        while (!emptyIndices.includes(index)) {
+          index = getRandomInt(0, 8);
+        }
+
+        break;
+      case GAME_MODES.medium:
+        // Medium level is basically ~half of the moves are minimax and the other ~half random
+        const smartMove = !board.isEmpty(grid) && Math.random() < 0.5;
+
+        if (smartMove) {
+          index = minimax(board, players.computer)[1];
+        } else {
+          index = getRandomInt(0, 8);
+
+          while (!emptyIndices.includes(index)) {
+            index = getRandomInt(0, 8);
+          }
+        }
+
+        break;
+      case GAME_MODES.difficult:
+      default:
+        index = board.isEmpty(grid) ? getRandomInt(0, 8) : minimax(board, players.computer)[1];
+    }
 
     if (!grid[index]) {
       move(index, players.computer);
 
       setNextMove(players.human);
     }
-  }, [move, grid, players]);
+  }, [move, grid, players, mode]);
 
   const humanMove = index => {
     if (!grid[index] && nextMove === players.human) {
@@ -97,6 +137,10 @@ const Game = () => {
 
       setNextMove(players.computer);
     }
+  };
+
+  const changeMode = e => {
+    setMode(e.target.value);
   };
 
   const startNewGame = () => {
@@ -151,6 +195,20 @@ const Game = () => {
     default:
       return (
         <Screen>
+          <Inner>
+            <ChooseText>Select difficulty</ChooseText>
+            <select onChange={changeMode} value={mode}>
+              {Object.keys(GAME_MODES).map(key => {
+                const gameMode = GAME_MODES[key];
+                return (
+                  <option key={gameMode} value={gameMode}>
+                    {key}
+                  </option>
+                );
+              })}
+            </select>
+          </Inner>
+
           <Inner>
             <ChooseText>Choose your player</ChooseText>
             <ButtonRow>
