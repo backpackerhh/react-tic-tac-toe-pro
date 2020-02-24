@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
 
-import { DIMENSIONS, PLAYER_X, PLAYER_O, SQUARE_DIMENSIONS, GAME_STATES } from "./constants";
+import Board from "./Board";
+import { DIMENSIONS, PLAYER_X, PLAYER_O, SQUARE_DIMENSIONS, GAME_STATES, DRAW } from "./constants";
 import { getRandomInt, switchPlayer } from "./utils";
 
 const Container = styled.div`
@@ -46,13 +47,14 @@ const Inner = styled.div`
 
 const ChooseText = styled.p``;
 
-const defaultBoard = new Array(DIMENSIONS ** 2).fill(null);
+const board = new Board();
 
 const Game = () => {
-  const [grid, setGrid] = useState(defaultBoard);
+  const [grid, setGrid] = useState(board.grid);
   const [players, setPlayers] = useState({ human: null, computer: null });
   const [gameState, setGameState] = useState(GAME_STATES.notStarted);
   const [nextMove, setNextMove] = useState(null);
+  const [winner, setWinner] = useState(null);
 
   const notStartedGame = () => {
     return (
@@ -81,6 +83,8 @@ const Game = () => {
             </Square>
           );
         })}
+
+        {winner}
       </Container>
     );
   };
@@ -140,6 +144,34 @@ const Game = () => {
 
     return () => timeout && clearTimeout(timeout);
   }, [nextMove, computerMove, players.computer, gameState]);
+
+  useEffect(() => {
+    const winner = board.getWinner(grid);
+
+    const declareWinner = winner => {
+      let winnerStr;
+
+      switch (winner) {
+        case PLAYER_X:
+          winnerStr = "Player X wins!";
+          break;
+        case PLAYER_O:
+          winnerStr = "Player O wins!";
+          break;
+        case DRAW:
+        default:
+          winnerStr = "It's a draw";
+      }
+
+      setGameState(GAME_STATES.over);
+
+      setWinner(winnerStr);
+    };
+
+    if (winner !== null && gameState !== GAME_STATES.over) {
+      declareWinner(winner);
+    }
+  }, [gameState, grid, nextMove]);
 
   return gameState === GAME_STATES.notStarted ? notStartedGame() : alreadyStartedGame();
 };
