@@ -56,39 +56,6 @@ const Game = () => {
   const [nextMove, setNextMove] = useState(null);
   const [winner, setWinner] = useState(null);
 
-  const notStartedGame = () => {
-    return (
-      <Screen>
-        <Inner>
-          <ChooseText>Choose your player</ChooseText>
-          <ButtonRow>
-            <button onClick={() => choosePlayer(PLAYER_X)}>X</button>
-            <p>or</p>
-            <button onClick={() => choosePlayer(PLAYER_O)}>O</button>
-          </ButtonRow>
-        </Inner>
-      </Screen>
-    );
-  };
-
-  const alreadyStartedGame = () => {
-    return (
-      <Container dimensions={DIMENSIONS}>
-        {grid.map((value, index) => {
-          const isActive = value !== null;
-
-          return (
-            <Square key={index} onClick={() => humanMove(index)}>
-              {isActive && <Marker>{value === PLAYER_X ? "X" : "O"}</Marker>}
-            </Square>
-          );
-        })}
-
-        {winner}
-      </Container>
-    );
-  };
-
   const choosePlayer = option => {
     setPlayers({ human: option, computer: switchPlayer(option) });
 
@@ -132,6 +99,12 @@ const Game = () => {
     }
   };
 
+  const startNewGame = () => {
+    setGameState(GAME_STATES.notStarted);
+
+    setGrid(board.grid);
+  };
+
   useEffect(() => {
     let timeout;
 
@@ -173,7 +146,43 @@ const Game = () => {
     }
   }, [gameState, grid, nextMove]);
 
-  return gameState === GAME_STATES.notStarted ? notStartedGame() : alreadyStartedGame();
+  switch (gameState) {
+    case GAME_STATES.notStarted:
+    default:
+      return (
+        <Screen>
+          <Inner>
+            <ChooseText>Choose your player</ChooseText>
+            <ButtonRow>
+              <button onClick={() => choosePlayer(PLAYER_X)}>X</button>
+              <p>or</p>
+              <button onClick={() => choosePlayer(PLAYER_O)}>O</button>
+            </ButtonRow>
+          </Inner>
+        </Screen>
+      );
+    case GAME_STATES.inProgress:
+      return (
+        <Container dimensions={DIMENSIONS}>
+          {grid.map((value, index) => {
+            const isActive = value !== null;
+
+            return (
+              <Square key={index} onClick={() => humanMove(index)}>
+                {isActive && <Marker>{value === PLAYER_X ? "X" : "O"}</Marker>}
+              </Square>
+            );
+          })}
+        </Container>
+      );
+    case GAME_STATES.over:
+      return (
+        <div>
+          <p>{winner}</p>
+          <button onClick={startNewGame}>Start over</button>
+        </div>
+      );
+  }
 };
 
 export default Game;
