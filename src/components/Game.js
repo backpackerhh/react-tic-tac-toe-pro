@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+
 import { DIMENSIONS, PLAYER_X, PLAYER_O, SQUARE_DIMENSIONS } from "./constants";
+import { getRandomInt } from "./utils";
 
 const Container = styled.div`
   display: flex;
@@ -40,13 +42,26 @@ const Game = () => {
     setGrid(grid => {
       const gridCopy = grid.concat();
       gridCopy[index] = player;
+
       return gridCopy;
     });
+  };
+
+  const computerMove = () => {
+    let index = getRandomInt(0, 8);
+
+    while (grid[index]) {
+      index = getRandomInt(0, 8);
+    }
+
+    move(index, players.computer);
   };
 
   const humanMove = index => {
     if (!grid[index]) {
       move(index, players.human);
+
+      computerMove();
     }
   };
 
