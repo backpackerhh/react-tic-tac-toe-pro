@@ -4,6 +4,7 @@ import styled from "styled-components";
 import Board from "./Board";
 import { DIMENSIONS, PLAYER_X, PLAYER_O, SQUARE_DIMENSIONS, GAME_STATES, DRAW } from "./constants";
 import { getRandomInt, switchPlayer } from "./utils";
+import { minimax } from "./minimax";
 
 const Container = styled.div`
   display: flex;
@@ -80,15 +81,14 @@ const Game = () => {
   );
 
   const computerMove = useCallback(() => {
-    let index = getRandomInt(0, 8);
+    const board = new Board(grid.concat());
+    const index = board.isEmpty(grid) ? getRandomInt(0, 8) : minimax(board, players.computer)[1];
 
-    while (grid[index]) {
-      index = getRandomInt(0, 8);
+    if (!grid[index]) {
+      move(index, players.computer);
+
+      setNextMove(players.human);
     }
-
-    move(index, players.computer);
-
-    setNextMove(players.human);
   }, [move, grid, players]);
 
   const humanMove = index => {
