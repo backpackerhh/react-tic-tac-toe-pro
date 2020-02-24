@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
+import Modal from "react-modal";
 
 import Board from "./Board";
+import { ResultModal } from "./ResultModal";
 import {
   DIMENSIONS,
   PLAYER_X,
@@ -13,6 +15,7 @@ import {
 } from "./constants";
 import { getRandomInt, switchPlayer } from "./utils";
 import { minimax } from "./minimax";
+import { border } from "./styles";
 
 const Container = styled.div`
   display: flex;
@@ -29,6 +32,7 @@ const Square = styled.div`
   width: ${SQUARE_DIMENSIONS}px;
   height: ${SQUARE_DIMENSIONS}px;
   border: 1px solid black;
+  ${border};
 
   &:hover {
     cursor: pointer;
@@ -65,6 +69,7 @@ const Game = () => {
   const [nextMove, setNextMove] = useState(null);
   const [winner, setWinner] = useState(null);
   const [mode, setMode] = useState(GAME_MODES.medium);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const choosePlayer = option => {
     setPlayers({ human: option, computer: switchPlayer(option) });
@@ -147,6 +152,8 @@ const Game = () => {
     setGameState(GAME_STATES.notStarted);
 
     setGrid(board.grid);
+
+    setModalOpen(false); // Close the modal when new game starts
   };
 
   useEffect(() => {
@@ -183,64 +190,62 @@ const Game = () => {
       setGameState(GAME_STATES.over);
 
       setWinner(winnerStr);
+
+      // Slight delay for the modal so there is some time to see the last move
+      setTimeout(() => setModalOpen(true), 300);
     };
 
     if (winner !== null && gameState !== GAME_STATES.over) {
       declareWinner(winner);
     }
+
+    Modal.setAppElement("body");
   }, [gameState, grid, nextMove]);
 
-  switch (gameState) {
-    case GAME_STATES.notStarted:
-    default:
-      return (
-        <Screen>
-          <Inner>
-            <ChooseText>Select difficulty</ChooseText>
-            <select onChange={changeMode} value={mode}>
-              {Object.keys(GAME_MODES).map(key => {
-                const gameMode = GAME_MODES[key];
-                return (
-                  <option key={gameMode} value={gameMode}>
-                    {key}
-                  </option>
-                );
-              })}
-            </select>
-          </Inner>
-
-          <Inner>
-            <ChooseText>Choose your player</ChooseText>
-            <ButtonRow>
-              <button onClick={() => choosePlayer(PLAYER_X)}>X</button>
-              <p>or</p>
-              <button onClick={() => choosePlayer(PLAYER_O)}>O</button>
-            </ButtonRow>
-          </Inner>
-        </Screen>
-      );
-    case GAME_STATES.inProgress:
-      return (
-        <Container dimensions={DIMENSIONS}>
-          {grid.map((value, index) => {
-            const isActive = value !== null;
-
+  return gameState === GAME_STATES.notStarted ? (
+    <Screen>
+      <Inner>
+        <ChooseText>Select difficulty</ChooseText>
+        <select onChange={changeMode} value={mode}>
+          {Object.keys(GAME_MODES).map(key => {
+            const gameMode = GAME_MODES[key];
             return (
-              <Square key={index} onClick={() => humanMove(index)}>
-                {isActive && <Marker>{value === PLAYER_X ? "X" : "O"}</Marker>}
-              </Square>
+              <option key={gameMode} value={gameMode}>
+                {key}
+              </option>
             );
           })}
-        </Container>
-      );
-    case GAME_STATES.over:
-      return (
-        <div>
-          <p>{winner}</p>
-          <button onClick={startNewGame}>Start over</button>
-        </div>
-      );
-  }
+        </select>
+      </Inner>
+      <Inner>
+        <ChooseText>Choose your player</ChooseText>
+        <ButtonRow>
+          <button onClick={() => choosePlayer(PLAYER_X)}>X</button>
+          <p>or</p>
+          <button onClick={() => choosePlayer(PLAYER_O)}>O</button>
+        </ButtonRow>
+      </Inner>
+    </Screen>
+  ) : (
+    <Container dimensions={DIMENSIONS}>
+      {grid.map((value, index) => {
+        const isActive = value !== null;
+
+        return (
+          <Square key={index} onClick={() => humanMove(index)}>
+            {isActive && <Marker>{value === PLAYER_X ? "X" : "O"}</Marker>}
+          </Square>
+        );
+      })}
+
+      <ResultModal
+        isOpen={modalOpen}
+        winner={winner}
+        close={() => setModalOpen(false)}
+        startNewGame={startNewGame}
+      />
+    </Container>
+  );
 };
 
 export default Game;
