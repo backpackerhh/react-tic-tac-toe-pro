@@ -60,6 +60,14 @@ const Inner = styled.div`
 
 const ChooseText = styled.p``;
 
+const Strikethrough = styled.div`
+  position: absolute;
+  ${({ styles }) => styles}
+  background-color: indianred;
+  height: 5px;
+  width: ${({ styles }) => !styles && "0px"};
+`;
+
 const board = new Board();
 
 const Game = () => {
@@ -237,6 +245,8 @@ const Game = () => {
           </Square>
         );
       })}
+
+      <Strikethrough styles={gameState === GAME_STATES.over && board.getStrikethroughStyles()} />
 
       <ResultModal
         isOpen={modalOpen}
