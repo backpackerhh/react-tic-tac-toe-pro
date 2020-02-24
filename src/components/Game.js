@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
 
 import { DIMENSIONS, PLAYER_X, PLAYER_O, SQUARE_DIMENSIONS, GAME_STATES } from "./constants";
@@ -52,6 +52,7 @@ const Game = () => {
   const [grid, setGrid] = useState(defaultBoard);
   const [players, setPlayers] = useState({ human: null, computer: null });
   const [gameState, setGameState] = useState(GAME_STATES.notStarted);
+  const [nextMove, setNextMove] = useState(null);
 
   const notStartedGame = () => {
     return (
@@ -88,18 +89,26 @@ const Game = () => {
     setPlayers({ human: option, computer: switchPlayer(option) });
 
     setGameState(GAME_STATES.inProgress);
+
+    setNextMove(PLAYER_X); // Set the Player X to make the first move
   };
 
-  const move = (index, player) => {
-    setGrid(grid => {
-      const gridCopy = grid.concat();
-      gridCopy[index] = player;
+  const move = useCallback(
+    (index, player) => {
+      if (player && gameState === GAME_STATES.inProgress) {
+        setGrid(grid => {
+          const gridCopy = grid.concat();
 
-      return gridCopy;
-    });
-  };
+          gridCopy[index] = player;
 
-  const computerMove = () => {
+          return gridCopy;
+        });
+      }
+    },
+    [gameState]
+  );
+
+  const computerMove = useCallback(() => {
     let index = getRandomInt(0, 8);
 
     while (grid[index]) {
@@ -107,15 +116,30 @@ const Game = () => {
     }
 
     move(index, players.computer);
-  };
+
+    setNextMove(players.human);
+  }, [move, grid, players]);
 
   const humanMove = index => {
-    if (!grid[index]) {
+    if (!grid[index] && nextMove === players.human) {
       move(index, players.human);
 
-      computerMove();
+      setNextMove(players.computer);
     }
   };
+
+  useEffect(() => {
+    let timeout;
+
+    if (nextMove !== null && nextMove === players.computer && gameState !== GAME_STATES.over) {
+      // Delay computer moves to make them more natural
+      timeout = setTimeout(() => {
+        computerMove();
+      }, 500);
+    }
+
+    return () => timeout && clearTimeout(timeout);
+  }, [nextMove, computerMove, players.computer, gameState]);
 
   return gameState === GAME_STATES.notStarted ? notStartedGame() : alreadyStartedGame();
 };
