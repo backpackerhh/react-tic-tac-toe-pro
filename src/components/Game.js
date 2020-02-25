@@ -38,6 +38,7 @@ const Square = styled.div`
     cursor: pointer;
   }
 `;
+Square.displayName = "Square";
 
 const Marker = styled.p`
   font-size: 68px;
