@@ -70,8 +70,8 @@ const Strikethrough = styled.div`
 
 const board = new Board();
 
-const Game = () => {
-  const [grid, setGrid] = useState(board.grid);
+const Game = ({ defaultGrid = board.grid }) => {
+  const [grid, setGrid] = useState(defaultGrid);
   const [players, setPlayers] = useState({ human: null, computer: null });
   const [gameState, setGameState] = useState(GAME_STATES.notStarted);
   const [nextMove, setNextMove] = useState(null);
