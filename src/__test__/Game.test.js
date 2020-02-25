@@ -41,3 +41,54 @@ it("should not make a move if the square is not empty", () => {
 
   expect(getByTestId("square_2")).toHaveTextContent("O"); // Should have initial value
 });
+
+it("should correctly show Player X as a winner", async () => {
+  // prettier-ignore
+  const grid = [
+    PLAYER_X, PLAYER_X, null,
+    PLAYER_O, PLAYER_O, null,
+    PLAYER_X, null, PLAYER_O
+  ];
+  const { getByTestId, getByText } = render(<Game defaultGrid={grid} />);
+
+  fireEvent.click(getByText("X"));
+  fireEvent.click(getByTestId("square_2")); // Make the winning move
+
+  await waitForElement(() => getByText("Player X wins!")); // Wait for result modal to appear
+
+  expect(getByText("Player X wins!")).toBeInTheDocument(); // Check that result is declared properly
+});
+
+it("should correctly display the draw result", async () => {
+  // prettier-ignore
+  const grid = [
+    PLAYER_X, PLAYER_X, PLAYER_O,
+    PLAYER_O, PLAYER_O, null,
+    PLAYER_X, PLAYER_X, PLAYER_O
+  ];
+  const { getByTestId, getByText } = render(<Game defaultGrid={grid} />);
+
+  fireEvent.click(getByText("X"));
+  fireEvent.click(getByTestId("square_5")); // Make the final move
+
+  await waitForElement(() => getByText("It's a draw")); // Wait for result modal to appear
+
+  expect(getByText("It's a draw")).toBeInTheDocument(); // Check that result is declared properly
+});
+
+it("should correctly show Player O as a winner", async () => {
+  // prettier-ignore
+  const grid = [
+    PLAYER_O, null, PLAYER_O,
+    PLAYER_X, PLAYER_O, PLAYER_X,
+    null, PLAYER_X, null
+  ];
+  const { getByTestId, getByText } = render(<Game defaultGrid={grid} />);
+
+  fireEvent.click(getByText("X"));
+  fireEvent.click(getByTestId("square_6")); // Make the move
+
+  await waitForElement(() => getByText("Player O wins!")); // Wait for result modal to appear
+
+  expect(getByText("Player O wins!")).toBeInTheDocument(); // Check that result is declared properly
+});
