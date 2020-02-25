@@ -92,3 +92,24 @@ it("should correctly show Player O as a winner", async () => {
 
   expect(getByText("Player O wins!")).toBeInTheDocument(); // Check that result is declared properly
 });
+
+it("should start a new game after 'Start over' button is pressed", async () => {
+  // prettier-ignore
+  const grid = [
+    PLAYER_O, null, PLAYER_O,
+    PLAYER_X, PLAYER_O, null,
+    null, PLAYER_X, PLAYER_X
+  ];
+  const { getByTestId, getByText } = render(<Game defaultGrid={grid} />);
+
+  fireEvent.click(getByText("X"));
+  fireEvent.click(getByTestId("square_6")); // Make the winning move
+
+  await waitForElement(() => getByText("Start over"));
+
+  fireEvent.click(getByText("Start over"));
+
+  await waitForElement(() => getByText("Choose your player"));
+
+  expect(getByText("Choose your player")).toBeInTheDocument();
+});
