@@ -17,6 +17,8 @@ You will also see any lint errors in the console.
 Launches the test runner in the interactive watch mode.<br />
 See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
+Tests are included in separated branches for both [Enzyme](https://github.com/backpackerhh/react-tic-tac-toe-pro/tree/enzyme) and [React Testing Library](https://github.com/backpackerhh/react-tic-tac-toe-pro/tree/react-testing-library).
+
 ### `yarn build`
 
 Builds the app for production to the `build` folder.<br />
