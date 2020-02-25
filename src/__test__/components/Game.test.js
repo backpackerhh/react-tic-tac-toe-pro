@@ -1,8 +1,8 @@
 import React from "react";
 import { render, fireEvent, cleanup, waitForElement } from "@testing-library/react";
 
-import Game from "../components/Game";
-import { PLAYER_X, PLAYER_O } from "../components/constants";
+import Game from "../../components/Game";
+import { PLAYER_X, PLAYER_O } from "../../components/constants";
 
 afterEach(cleanup);
 
