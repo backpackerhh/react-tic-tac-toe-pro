@@ -43,6 +43,7 @@ const ModalContent = styled.p`
   flex: 1 1 auto;
   text-align: center;
 `;
+ModalContent.displayName = "ModalContent";
 
 const ModalFooter = styled.div`
   display: flex;
