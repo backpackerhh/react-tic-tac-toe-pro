@@ -105,8 +105,8 @@ const Game = () => {
 
   const computerMove = useCallback(() => {
     // Important to pass a copy of the grid here
-    const board = new Board(grid.concat());
-    const emptyIndices = board.getEmptySquares(grid);
+    const newBoard = new Board(grid.concat());
+    const emptyIndices = newBoard.getEmptySquares(grid);
     let index;
 
     switch (mode) {
@@ -120,10 +120,10 @@ const Game = () => {
         break;
       case GAME_MODES.medium:
         // Medium level is basically ~half of the moves are minimax and the other ~half random
-        const smartMove = !board.isEmpty(grid) && Math.random() < 0.5;
+        const smartMove = !newBoard.isEmpty(grid) && Math.random() < 0.5;
 
         if (smartMove) {
-          index = minimax(board, players.computer)[1];
+          index = minimax(newBoard, players.computer)[1];
         } else {
           index = getRandomInt(0, 8);
 
@@ -135,7 +135,9 @@ const Game = () => {
         break;
       case GAME_MODES.difficult:
       default:
-        index = board.isEmpty(grid) ? getRandomInt(0, 8) : minimax(board, players.computer)[1];
+        index = newBoard.isEmpty(grid)
+          ? getRandomInt(0, 8)
+          : minimax(newBoard, players.computer)[1];
     }
 
     if (!grid[index]) {
