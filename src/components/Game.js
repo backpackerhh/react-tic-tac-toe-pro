@@ -240,7 +240,7 @@ const Game = () => {
         const isActive = value !== null;
 
         return (
-          <Square key={index} onClick={() => humanMove(index)}>
+          <Square data-testid={`square_${index}`} key={index} onClick={() => humanMove(index)}>
             {isActive && <Marker>{value === PLAYER_X ? "X" : "O"}</Marker>}
           </Square>
         );
