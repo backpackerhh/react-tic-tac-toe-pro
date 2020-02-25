@@ -129,3 +129,38 @@ it("should correctly show Player O as a winner", () => {
 
   expect(wrapper.find("ModalContent").text()).toBe("Player O wins!"); // Check that result is declared properly
 });
+
+it("should start a new game after 'Start over' button is pressed", () => {
+  // prettier-ignore
+  const grid = [
+    PLAYER_O, null, PLAYER_O,
+    PLAYER_X, PLAYER_O, null,
+    null, PLAYER_X, PLAYER_X
+  ];
+  const wrapper = mount(<Game defaultGrid={grid} />);
+  const buttonX = findButtonByText(wrapper, "X");
+
+  buttonX.simulate("click");
+
+  wrapper
+    .find("Square")
+    .at(6)
+    .simulate("click"); // Make the winning move
+
+  act(() => {
+    jest.runAllTimers();
+  });
+
+  wrapper.update(); // Re-render component
+
+  const restartButton = findButtonByText(wrapper, "Start over"); // Get restart button and click it
+
+  restartButton.simulate("click");
+
+  // Verify that new game screen is shown
+  const choosePlayer = wrapper.findWhere(
+    component => component.name() === "p" && component.text() === "Choose your player"
+  );
+
+  expect(choosePlayer.length).toBe(1);
+});
